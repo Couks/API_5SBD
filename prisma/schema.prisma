@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model TemporaryOrder {
+  id                Int      @id @default(autoincrement())
+  orderId           String
+  orderItemId       String
+  purchaseDate      DateTime
+  paymentsDate      DateTime
+  buyerEmail        String
+  buyerName         String
+  cpf               String
+  buyerPhoneNumber  String
+  sku               String
+  productName       String
+  quantityPurchased Int
+  currency          String
+  itemPrice         Float
+  shipServiceLevel  String
+  recipientName     String
+  shipAddress1      String
+  shipAddress2      String?
+  shipAddress3      String?
+  shipCity          String
+  shipState         String
+  shipPostalCode    String
+  shipCountry       String
+  iossNumber        String?
+
+  @@map("temporary_order")
+}
+
+model Customer {
+  id          Int     @id @default(autoincrement())
+  email       String  @unique
+  name        String
+  cpf         String  @unique
+  phoneNumber String
+  orders      Order[]
+}
+
+model Product {
+  id             Int             @id @default(autoincrement())
+  sku            String          @unique
+  name           String
+  price          Float
+  stock          Int
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+  purchaseOrders PurchaseOrder[]
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  orderId      String      @unique
+  purchaseDate DateTime
+  paymentsDate DateTime
+  customerId   Int
+  customer     Customer    @relation(fields: [customerId], references: [id])
+  items        OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
+}
+
+model StockMovement {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  quantity  Int
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model PurchaseOrder {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  quantity  Int
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+}
